@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interview Setup</title>
+    <script>
+    function checkTime() {
+        const interviewTime = new Date("{{ interview_time }}".replace(/_/g,'T'));
+        const now = new Date();
+        const diffMinutes = (interviewTime - now) / 60000;
+        const consentDiv = document.getElementById("consentDiv");
+        const tooEarly = document.getElementById("tooEarly");
+
+        if (diffMinutes > 30) {
+            tooEarly.style.display = "block";
+            consentDiv.style.display = "none";
+        } else {
+            tooEarly.style.display = "none";
+            consentDiv.style.display = "block";
+        }
+    }
+    window.onload = checkTime;
+    </script>
+</head>
+<body>
+    <h2>Candidate Setup</h2>
+    <p id="tooEarly" style="display:none;color:red;">It's too early. Open this page 30 minutes before your interview.</p>
+
+    <div id="consentDiv" style="display:none;">
+        <p>Your interview is scheduled at: <b>{{ interview_time }}</b></p>
+        <label><input type="checkbox" id="consentChk"> I agree to monitoring</label><br><br>
+        <button id="downloadBtn" disabled>Download Monitoring Tool</button>
+    </div>
+
+    <script>
+    document.getElementById("consentChk").addEventListener("change", function(){
+        document.getElementById("downloadBtn").disabled = !this.checked;
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", function(){
+        // Redirect with email and time in query params
+        window.location.href = "{{ exe_link }}&args=" + encodeURIComponent("{{ email }} {{ interview_time }}");
+    });
+    </script>
+</body>
+</html>
