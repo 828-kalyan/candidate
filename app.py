@@ -8,7 +8,12 @@ DROPBOX_EXE_URL = "https://drive.google.com/file/d/15FZUPc12eopGoXOGxHsj2cYOx8Nn
 def candidate_page():
     email = request.args.get("email")
     interview_time = request.args.get("time")  # format: YYYY-MM-DD_HH_MM_SS
-    return render_template("candidate.html", email=email, interview_time=interview_time, exe_link=DROPBOX_EXE_URL)
+    return render_template(
+        "candidate.html",
+        email=email,
+        interview_time=interview_time,
+        exe_link=DROPBOX_EXE_URL
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
