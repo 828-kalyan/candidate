@@ -40,9 +40,17 @@ PARENT_FOLDER_ID = "18-aW4c8Mu4S7UQVGOldrZFPkeHhlI_h3"   # Adjust to your Drive 
 # Helpers for Google Drive
 # ---------------------
 def build_drive_service():
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
+     # Read JSON from environment variable
+    sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT")
+    if not sa_json:
+        raise RuntimeError("Missing GOOGLE_SERVICE_ACCOUNT env var")
+
+    # Write to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".json") as f:
+        f.write(sa_json)
+        path = f.name
+
+    creds = service_account.Credentials.from_service_account_file(path, scopes=SCOPES)
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 def get_folder_id(drive_service, folder_name, parent_id):
