@@ -4,10 +4,10 @@ app = Flask(__name__)
 
 DROPBOX_EXE_URL = "https://drive.google.com/file/d/15FZUPc12eopGoXOGxHsj2cYOx8Nn7bzE/view?usp=drive_link"
 
-@app.route("/candidate")
+@app.route("/")
 def candidate_page():
     email = request.args.get("email")
-    interview_time = request.args.get("time")  # format: YYYY-MM-DD_HH_MM_SS
+    interview_time = request.args.get("time")  # e.g. 2025-09-25_12-00
     return render_template(
         "candidate.html",
         email=email,
