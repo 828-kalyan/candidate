@@ -41,57 +41,69 @@
   </div>
 
   <script>
-    const rawTime = "{{ interview_time }}"; // e.g. "2025-09-25_12-00"
-    const email = "{{ email }}";
+  const rawTime = "{{ interview_time }}"; // e.g. "2025-09-26_12-00"
+  const email = "{{ email }}";
 
-    // Parse into Date for countdown logic
-    function parseInterviewTime(str) {
-      // "2025-09-25_12-00" → "2025-09-25T12:00:00"
-      const iso = str.replace("_", "T").replace("-", ":");
-      return new Date(iso + ":00");
+  // Convert "2025-09-26_12-00" → Date object
+  function parseInterviewTime(str) {
+    // Split into parts
+    const [datePart, hm] = str.split("_");  // ["2025-09-26", "12-00"]
+    const [year, month, day] = datePart.split("-");
+    const [hour, minute] = hm.split("-");
+    return new Date(
+      parseInt(year),
+      parseInt(month) - 1, // JS months are 0-indexed
+      parseInt(day),
+      parseInt(hour),
+      parseInt(minute),
+      0
+    );
+  }
+
+  const interviewTime = parseInterviewTime(rawTime);
+
+  function updateCountdown() {
+    const now = new Date();
+    const diffMs = interviewTime - now;
+    const diffMinutes = diffMs / 60000;
+
+    const countdownEl = document.getElementById("countdown");
+    const consentDiv = document.getElementById("consentDiv");
+    const tooEarly = document.getElementById("tooEarly");
+
+    if (diffMinutes > 30) {
+      // Too early
+      tooEarly.style.display = "block";
+      countdownEl.innerHTML = `⏳ Interview starts in <b>${Math.floor(diffMinutes)} minutes</b>. Please open this link only 30 minutes before.`;
+      consentDiv.style.display = "none";
+    } else if (diffMinutes > 0) {
+      // Within 30 minutes window
+      tooEarly.style.display = "none";
+      consentDiv.style.display = "block";
+      const mins = Math.floor(diffMinutes);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+      countdownEl.innerHTML = `Interview starts in <b>${mins}m ${secs}s</b>`;
+    } else {
+      // Interview time reached or passed
+      tooEarly.style.display = "none";
+      consentDiv.style.display = "block";
+      countdownEl.innerHTML = "✅ Your interview time has arrived!";
     }
+  }
 
-    const interviewTime = parseInterviewTime(rawTime);
+  setInterval(updateCountdown, 1000);
+  window.onload = updateCountdown;
 
-    function updateCountdown() {
-      const now = new Date();
-      const diffMs = interviewTime - now;
-      const diffMinutes = diffMs / 60000;
+  // Consent handling
+  document.getElementById("consentChk").addEventListener("change", function() {
+    document.getElementById("downloadBtn").disabled = !this.checked;
+  });
 
-      const countdownEl = document.getElementById("countdown");
-      const consentDiv = document.getElementById("consentDiv");
-      const tooEarly = document.getElementById("tooEarly");
-
-      if (diffMinutes > 30) {
-        tooEarly.style.display = "block";
-        countdownEl.innerHTML = `Interview starts in <b>${Math.floor(diffMinutes)} minutes</b>`;
-        consentDiv.style.display = "none";
-      } else if (diffMinutes > 0) {
-        tooEarly.style.display = "none";
-        consentDiv.style.display = "block";
-        const mins = Math.floor(diffMinutes);
-        const secs = Math.floor((diffMs % 60000) / 1000);
-        countdownEl.innerHTML = `Interview starts in <b>${mins}m ${secs}s</b>`;
-      } else {
-        tooEarly.style.display = "none";
-        consentDiv.style.display = "block";
-        countdownEl.innerHTML = "✅ Your interview time has arrived!";
-      }
-    }
-
-    setInterval(updateCountdown, 1000);
-    window.onload = updateCountdown;
-
-    // Consent handling
-    document.getElementById("consentChk").addEventListener("change", function() {
-      document.getElementById("downloadBtn").disabled = !this.checked;
-    });
-
-    // Download handler (passes EXACT email + timestamp from URL)
-    document.getElementById("downloadBtn").addEventListener("click", function() {
-      const args = email + " " + rawTime;
-      window.location.href = "{{ exe_link }}&args=" + encodeURIComponent(args);
-    });
-  </script>
+  // Download handler (email + timestamp exactly as in URL)
+  document.getElementById("downloadBtn").addEventListener("click", function() {
+    const args = email + " " + rawTime;
+    window.location.href = "{{ exe_link }}&args=" + encodeURIComponent(args);
+  });
+</script>
 </body>
 </html>
